@@ -12,23 +12,6 @@ setup_db(app)
 CORS(app)
 
 
-def stringify(data: list) -> str:
-    if data is None:
-        return "[]"
-
-    output = "["
-    for item in data:
-        if type(item) is dict:
-            output += json.dumps(item)
-        elif type(item) is list:
-            output += stringify(item)
-        else:
-            output += str(item)
-    output += "]"
-
-    return output
-
-
 @app.route("/")
 def index():
     return jsonify({"success": True, "message": "Welcome to Coffee Shop API"})
@@ -63,8 +46,8 @@ DONE: implement endpoint
 def get_drinks():
     try:
         drinks = Drink.query.all()
-        drinks = [drink.short() for drink in drinks]
-        return jsonify({"success": True, "drinks": drinks})
+        drinks_list = [drink.short() for drink in drinks]
+        return jsonify({"success": True, "drinks": drinks_list})
     except Exception as err:
         print(err)
         abort(500)
@@ -109,17 +92,17 @@ def create_drinks(payload):
     try:
         reqBody = request.get_json()
         title = reqBody["title"]
-        recipe = reqBody["recipe"]
-        newDrink = Drink(title, stringify(recipe))
-        newDrink.insert()
-        return jsonify({"success": True, "drinks": reqBody})
+        recipe = json.dumps(reqBody["recipe"])
+        drink = Drink(title, recipe)
+        drink.insert()
+        return jsonify({"success": True, "drinks": drink.long()})
     except Exception as err:
         print(err)
         abort(400)
 
 
 """
-@TODO implement endpoint
+DONE: implement endpoint
     PATCH /drinks/<id>
         where <id> is the existing model id
         it should respond with a 404 error if <id> is not found
