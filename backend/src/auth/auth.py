@@ -1,6 +1,7 @@
 import json
 from flask import request, _request_ctx_stack, abort
 from functools import wraps
+from flask.json import jsonify
 from jose import jwt
 from urllib.request import urlopen
 from icecream import ic
@@ -202,9 +203,13 @@ def requires_auth(permission=""):
     def requires_auth_decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            token = get_token_auth_header()
-            payload = verify_decode_jwt(token)
-            check_permissions(permission, payload)
+            try:
+                token = get_token_auth_header()
+                payload = verify_decode_jwt(token)
+                check_permissions(permission, payload)
+            except:
+                return abort(401)
+
             return f(payload, *args, **kwargs)
 
         return wrapper
