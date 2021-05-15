@@ -6,9 +6,22 @@ from icecream import ic
 from .database.models import db_drop_and_create_all, setup_db, Drink
 from .auth.auth import AuthError, requires_auth
 
+
 app = Flask(__name__)
 setup_db(app)
 CORS(app)
+
+
+def stringify(data: list) -> str:
+    if data is None:
+        return "[]"
+
+    output = "["
+    for item in data:
+        output += json.dumps(item)
+    output += "]"
+
+    return output
 
 
 @app.route("/")
@@ -61,6 +74,21 @@ def login(payload):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 """
+
+
+@app.route("/drinks", methods=["POST"])
+@requires_auth("post:drinks")
+def create_drinks(payload):
+    try:
+        reqBody = request.get_json()
+        title = reqBody["title"]
+        recipe = reqBody["recipe"]
+        newDrink = Drink(title, stringify(recipe))
+        newDrink.insert()
+        return jsonify({"success": True, "drinks": reqBody})
+    except Exception as err:
+        print(err)
+        abort(400)
 
 
 """
