@@ -1,9 +1,8 @@
 import os
 from flask import Flask, request, jsonify, abort
-from sqlalchemy import exc
 import json
 from flask_cors import CORS
-
+from icecream import ic
 from .database.models import db_drop_and_create_all, setup_db, Drink
 from .auth.auth import AuthError, requires_auth
 
@@ -15,6 +14,13 @@ CORS(app)
 @app.route("/")
 def index():
     return jsonify({"success": True, "message": "Welcome to Coffee Shop API"})
+
+
+@app.route("/login")
+@requires_auth()
+def login(payload):
+    ic(payload)
+    return jsonify({"success": True, "message": "You have logged in"})
 
 
 """
