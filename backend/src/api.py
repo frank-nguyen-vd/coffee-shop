@@ -139,7 +139,7 @@ def update_drinks(payload, drink_id):
 
 
 """
-@TODO implement endpoint
+DONE: implement endpoint
     DELETE /drinks/<id>
         where <id> is the existing model id
         it should respond with a 404 error if <id> is not found
@@ -148,6 +148,25 @@ def update_drinks(payload, drink_id):
     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
         or appropriate status code indicating reason for failure
 """
+
+
+@app.route("/drinks/<int:drink_id>", methods=["DELETE"])
+@requires_auth("delete:drinks")
+def delete_drinks(payload, drink_id):
+    if drink_id is None:
+        abort(400)
+    drink = Drink.query.filter(Drink.id == drink_id).one_or_none()
+
+    if drink is None:
+        abort(404)
+
+    try:
+        drink.delete()
+        return jsonify({"success": True, "drinks": drink_id})
+
+    except Exception as err:
+        print(err)
+        abort(500)
 
 
 # Error Handling
