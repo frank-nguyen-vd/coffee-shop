@@ -18,7 +18,12 @@ def stringify(data: list) -> str:
 
     output = "["
     for item in data:
-        output += json.dumps(item)
+        if type(item) is dict:
+            output += json.dumps(item)
+        elif type(item) is list:
+            output += stringify(item)
+        else:
+            output += str(item)
     output += "]"
 
     return output
@@ -32,7 +37,6 @@ def index():
 @app.route("/login")
 @requires_auth()
 def login(payload):
-    ic(payload)
     return jsonify({"success": True, "message": "You have logged in"})
 
 
@@ -46,13 +50,24 @@ def login(payload):
 
 # ROUTES
 """
-@TODO implement endpoint
+DONE: implement endpoint
     GET /drinks
         it should be a public endpoint
         it should contain only the drink.short() data representation
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 """
+
+
+@app.route("/drinks")
+def get_drinks():
+    try:
+        drinks = Drink.query.all()
+        drinks = [drink.short() for drink in drinks]
+        return jsonify({"success": True, "drinks": drinks})
+    except Exception as err:
+        print(err)
+        abort(500)
 
 
 """
