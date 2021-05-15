@@ -93,7 +93,7 @@ def get_drinks_detail(payload):
 
 
 """
-@TODO implement endpoint
+DONE: implement endpoint
     POST /drinks
         it should create a new row in the drinks table
         it should require the 'post:drinks' permission
@@ -129,6 +129,30 @@ def create_drinks(payload):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 """
+
+
+@app.route("/drinks/<int:drink_id>", methods=["PATCH"])
+@requires_auth("patch:drinks")
+def update_drinks(payload, drink_id):
+    if drink_id is None:
+        abort(400)
+    drink = Drink.query.filter(Drink.id == drink_id).one_or_none()
+
+    if drink is None:
+        abort(404)
+
+    try:
+        reqBody = request.get_json()
+        if "title" in reqBody:
+            drink.title = reqBody["title"]
+        if "recipe" in reqBody:
+            drink.recipe = reqBody["recipe"]
+        drink.update()
+        return jsonify({"success": True, "drinks": drink.short()})
+
+    except Exception as err:
+        print(err)
+        abort(500)
 
 
 """
