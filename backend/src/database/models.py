@@ -2,10 +2,14 @@ import os
 from sqlalchemy import Column, String, Integer
 from flask_sqlalchemy import SQLAlchemy
 import json
+from icecream import ic
+from sqlalchemy.sql.sqltypes import BLOB
 
 database_filename = "database.db"
 project_dir = os.path.dirname(os.path.abspath(__file__))
-database_path = "sqlite:///{}".format(os.path.join(project_dir, database_filename))
+database_path = "sqlite:///{}".format(
+    os.path.join(project_dir, database_filename)
+)
 
 db = SQLAlchemy()
 
@@ -49,13 +53,18 @@ a persistent drink entity, extends the base SQLAlchemy Model
 
 
 class Drink(db.Model):
+    __tablename__ = "drink"
     # Autoincrementing, unique primary key
     id = Column(Integer().with_variant(Integer, "sqlite"), primary_key=True)
     # String Title
-    title = Column(String(80), unique=True)
+    title = Column(String(80), nullable=False, unique=True)
     # the ingredients blob - this stores a lazy json blob
     # the required datatype is [{'color': string, 'name':string, 'parts':number}]
     recipe = Column(String(180), nullable=False)
+
+    def __init__(self, title, recipe):
+        self.title = title
+        self.recipe = recipe
 
     """
     short()
@@ -65,7 +74,8 @@ class Drink(db.Model):
     def short(self):
         print(json.loads(self.recipe))
         short_recipe = [
-            {"color": r["color"], "parts": r["parts"]} for r in json.loads(self.recipe)
+            {"color": r["color"], "parts": r["parts"]}
+            for r in json.loads(self.recipe)
         ]
         return {"id": self.id, "title": self.title, "recipe": short_recipe}
 
@@ -75,7 +85,11 @@ class Drink(db.Model):
     """
 
     def long(self):
-        return {"id": self.id, "title": self.title, "recipe": json.loads(self.recipe)}
+        return {
+            "id": self.id,
+            "title": self.title,
+            "recipe": json.loads(self.recipe),
+        }
 
     """
     insert()
