@@ -1,13 +1,12 @@
 import json
-from flask import request, _request_ctx_stack
+from flask import request, _request_ctx_stack, abort
 from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
+from icecream import ic
+import os
 
-
-AUTH0_DOMAIN = "udacity-fsnd.auth0.com"
-ALGORITHMS = ["RS256"]
-API_AUDIENCE = "dev"
+CONFIG_PATH = "../config.json"
 
 ## AuthError Exception
 """
@@ -32,6 +31,11 @@ class AuthError(Exception):
         it should raise an AuthError if the header is malformed
     return the token part of the header
 """
+
+
+def load_config(file_path):
+    with open(file_path, "r") as f:
+        return json.load(f)
 
 
 def get_token_auth_header():
