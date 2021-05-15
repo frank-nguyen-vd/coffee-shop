@@ -24,7 +24,7 @@ def login(payload):
 
 
 """
-@TODO uncomment the following line to initialize the datbase
+DONE: uncomment the following line to initialize the datbase
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this funciton will add one
@@ -173,6 +173,30 @@ def delete_drinks(payload, drink_id):
 """
 Example error handling for unprocessable entity
 """
+
+
+@app.errorhandler(400)
+def bad_request(error):
+    return (
+        jsonify({"success": False, "error": 422, "message": "bad request"}),
+        400,
+    )
+
+
+@app.errorhandler(401)
+def unauthorized(error):
+    return (
+        jsonify({"success": False, "error": 401, "message": "unauthorized"}),
+        401,
+    )
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return (
+        jsonify({"success": False, "error": 404, "message": "not found"}),
+        404,
+    )
 
 
 @app.errorhandler(422)
