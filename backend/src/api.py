@@ -29,7 +29,7 @@ DONE: uncomment the following line to initialize the datbase
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this funciton will add one
 """
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 # ROUTES
 """
@@ -131,7 +131,7 @@ def update_drinks(payload, drink_id):
         if "recipe" in reqBody:
             drink.recipe = reqBody["recipe"]
         drink.update()
-        return jsonify({"success": True, "drinks": drink.short()})
+        return jsonify({"success": True, "drinks": [drink.short()]})
 
     except Exception as err:
         print(err)
@@ -178,7 +178,7 @@ Example error handling for unprocessable entity
 @app.errorhandler(400)
 def bad_request(error):
     return (
-        jsonify({"success": False, "error": 422, "message": "bad request"}),
+        jsonify({"success": False, "error": 400, "message": "bad request"}),
         400,
     )
 
@@ -188,6 +188,20 @@ def unauthorized(error):
     return (
         jsonify({"success": False, "error": 401, "message": "unauthorized"}),
         401,
+    )
+
+
+@app.errorhandler(403)
+def forbidden(error):
+    return (
+        jsonify(
+            {
+                "success": False,
+                "error": 403,
+                "message": "no permission to access this",
+            }
+        ),
+        403,
     )
 
 

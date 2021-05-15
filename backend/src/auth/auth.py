@@ -208,8 +208,13 @@ def requires_auth(permission=""):
                 payload = verify_decode_jwt(token)
                 check_permissions(permission, payload)
             except Exception as err:
-                ic(err)
-                return abort(401)
+                if err.status_code == 401:
+                    abort(401)
+                elif err.status_code == 403:
+                    abort(403)
+                elif err.status_code == 400:
+                    abort(400)
+                return
 
             return f(payload, *args, **kwargs)
 
