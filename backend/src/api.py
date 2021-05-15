@@ -82,7 +82,7 @@ DONE: implement endpoint
 
 @app.route("/drinks-detail")
 @requires_auth("get:drinks-detail")
-def get_drinks(payload):
+def get_drinks_detail(payload):
     try:
         drinks = Drink.query.all()
         drinks = [drink.long() for drink in drinks]
