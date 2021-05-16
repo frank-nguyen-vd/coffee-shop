@@ -2,6 +2,6 @@
     "DOMAIN" : "franknguyenvd.au.auth0.com",
     "API_IDENTIFIER" : "localhost:5000",
     "CLIENT_ID" : "nDydbCaRbNAultiBLz5p9JxDGRSxhYIH",
-    "CALLBACK_URI" : "http://127.0.0.1:5000",
+    "CALLBACK_URI" : "http://localhost:8100",
     "ALGORITHMS" : ["RS256"]
 }
