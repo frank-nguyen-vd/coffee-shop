@@ -1,4 +1,5 @@
-/* DONE: replace with your variables
+/* STATUS: DONE
+ * @TODO: replace with your variables
  * ensure all variables on this page match your project
  */
 
