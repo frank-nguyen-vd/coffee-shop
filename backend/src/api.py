@@ -24,7 +24,8 @@ def login(payload):
 
 
 """
-DONE: uncomment the following line to initialize the datbase
+STATUS: DONE
+@TODO: uncomment the following line to initialize the datbase
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this funciton will add one
@@ -33,7 +34,8 @@ db_drop_and_create_all()
 
 # ROUTES
 """
-DONE: implement endpoint
+STATUS: DONE
+@TODO: implement endpoint
     GET /drinks
         it should be a public endpoint
         it should contain only the drink.short() data representation
@@ -54,7 +56,8 @@ def get_drinks():
 
 
 """
-DONE: implement endpoint
+STATUS: DONE
+@TODO: implement endpoint
     GET /drinks-detail
         it should require the 'get:drinks-detail' permission
         it should contain the drink.long() data representation
@@ -76,7 +79,8 @@ def get_drinks_detail(payload):
 
 
 """
-DONE: implement endpoint
+STATUS: DONE
+@TODO: implement endpoint
     POST /drinks
         it should create a new row in the drinks table
         it should require the 'post:drinks' permission
@@ -102,7 +106,8 @@ def create_drinks(payload):
 
 
 """
-DONE: implement endpoint
+STATUS: DONE
+@TODO: implement endpoint
     PATCH /drinks/<id>
         where <id> is the existing model id
         it should respond with a 404 error if <id> is not found
@@ -139,7 +144,8 @@ def update_drinks(payload, drink_id):
 
 
 """
-DONE: implement endpoint
+STATUS: DONE
+@TODO: implement endpoint
     DELETE /drinks/<id>
         where <id> is the existing model id
         it should respond with a 404 error if <id> is not found
@@ -174,6 +180,12 @@ def delete_drinks(payload, drink_id):
 Example error handling for unprocessable entity
 """
 
+"""
+STATUS: DONE
+@TODO: implement error handler for AuthError
+    error handler should conform to general task above
+"""
+
 
 @app.errorhandler(400)
 def bad_request(error):
@@ -205,10 +217,30 @@ def forbidden(error):
     )
 
 
+"""
+STATUS: DONE
+@TODO: implement error handlers using the @app.errorhandler(error) decorator
+    each error handler should return (with approprate messages):
+             jsonify({
+                    "success": False,
+                    "error": 404,
+                    "message": "resource not found"
+                    }), 404
+"""
+
+"""
+STATUS: DONE
+@TODO: implement error handler for 404
+    error handler should conform to general task above
+"""
+
+
 @app.errorhandler(404)
 def not_found(error):
     return (
-        jsonify({"success": False, "error": 404, "message": "not found"}),
+        jsonify(
+            {"success": False, "error": 404, "message": "resource not found"}
+        ),
         404,
     )
 
@@ -219,26 +251,3 @@ def unprocessable(error):
         jsonify({"success": False, "error": 422, "message": "unprocessable"}),
         422,
     )
-
-
-"""
-DONE: implement error handlers using the @app.errorhandler(error) decorator
-    each error handler should return (with approprate messages):
-             jsonify({
-                    "success": False,
-                    "error": 404,
-                    "message": "resource not found"
-                    }), 404
-
-"""
-
-"""
-DONE: implement error handler for 404
-    error handler should conform to general task above
-"""
-
-
-"""
-DONE: implement error handler for AuthError
-    error handler should conform to general task above
-"""
