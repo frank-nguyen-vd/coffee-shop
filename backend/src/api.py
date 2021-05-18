@@ -238,9 +238,7 @@ STATUS: DONE
 @app.errorhandler(404)
 def not_found(error):
     return (
-        jsonify(
-            {"success": False, "error": 404, "message": "resource not found"}
-        ),
+        jsonify({"success": False, "error": 404, "message": "resource not found"}),
         404,
     )
 

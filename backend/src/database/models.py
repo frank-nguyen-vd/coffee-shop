@@ -7,9 +7,7 @@ from sqlalchemy.sql.sqltypes import BLOB
 
 database_filename = "database.db"
 project_dir = os.path.dirname(os.path.abspath(__file__))
-database_path = "sqlite:///{}".format(
-    os.path.join(project_dir, database_filename)
-)
+database_path = "sqlite:///{}".format(os.path.join(project_dir, database_filename))
 
 db = SQLAlchemy()
 
@@ -73,8 +71,7 @@ class Drink(db.Model):
 
     def short(self):
         short_recipe = [
-            {"color": r["color"], "parts": r["parts"]}
-            for r in json.loads(self.recipe)
+            {"color": r["color"], "parts": r["parts"]} for r in json.loads(self.recipe)
         ]
         return {"id": self.id, "title": self.title, "recipe": short_recipe}
 
