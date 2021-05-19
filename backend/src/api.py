@@ -45,32 +45,49 @@ STATUS: DONE
 @app.route("/drinks")
 def get_drinks():
     """Get a list of drinks
-    This is using docstrings for specifications.
     ---
-    parameters:
-      - name: palette
-        in: path
-        type: string
-        enum: ['all', 'rgb', 'cmyk']
-        required: true
-        default: all
     definitions:
-      Palette:
-        type: object
-        properties:
-          palette_name:
-            type: array
-            items:
-              $ref: '#/definitions/Color'
-      Color:
-        type: string
+        ListDrinkShort:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                drinks:
+                    type: array
+                    items:
+                        $ref: '#/definitions/DrinkShort'
+        DrinkShort:
+            type: object
+            properties:
+                id:
+                    type: integer
+                title:
+                    type: string
+                recipe:
+                    $ref: '#definitions/RecipeShort'
+        RecipeLong:
+            type: object
+            properties:
+                name:
+                    type: string
+                color:
+                    type: string
+                parts:
+                    type: integer
+        RecipeShort:
+            type: object
+            properties:
+                color:
+                    type: string
+                parts:
+                    type: integer
+
+
     responses:
       200:
-        description: A list of colors (may be filtered by palette)
+        description: A list of drinks in short form
         schema:
-          $ref: '#/definitions/Palette'
-        examples:
-          rgb: ['red', 'green', 'blue']
+          $ref: '#/definitions/ListDrinkShort'
     """
     try:
         drinks = Drink.query.all()
