@@ -393,7 +393,7 @@ STATUS: DONE
 """
 
 
-@app.errohandler(AuthError)
+@app.errorhandler(AuthError)
 def handle_auth_error(error):
     """
     List of errors:
