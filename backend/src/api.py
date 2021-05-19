@@ -60,7 +60,7 @@ def get_drinks():
             type: object
             properties:
                 id:
-                    type: integer
+                    type: string
                 title:
                     type: string
                 recipe:
@@ -120,7 +120,7 @@ def get_drinks_detail(payload):
             type: object
             properties:
                 id:
-                    type: integer
+                    type: string
                 title:
                     type: string
                 recipe:
@@ -222,7 +222,7 @@ def update_drinks(payload, drink_id):
     parameters:
         -   in: query
             name: drink_id
-            type: integer
+            type: string
             description: The id of the drink to be updated
         -   in: body
             name: drink
@@ -278,6 +278,26 @@ STATUS: DONE
 @app.route("/drinks/<int:drink_id>", methods=["DELETE"])
 @requires_auth("delete:drinks")
 def delete_drinks(payload, drink_id):
+    """Delete an existing drink
+    ---
+    parameters:
+        -   in: query
+            name: drink_id
+            type: string
+            description: The id of the drink to be deleted
+    responses:
+      200:
+        description: The id of the deleted drink
+        schema:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                delete:
+                    type: string
+
+    """
+
     if drink_id is None:
         abort(400)
     drink = Drink.query.filter(Drink.id == drink_id).one_or_none()
