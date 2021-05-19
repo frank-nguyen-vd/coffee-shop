@@ -12,9 +12,9 @@
             
             "program": "${file}",
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/backend",
+            "cwd": "${workspaceFolder}/backend/",
             "env": {
-                "PYTHONPATH": "${cwd}"
+                "PYTHONPATH": "${workspaceFolder}/env/bin/"
             }
 
         }

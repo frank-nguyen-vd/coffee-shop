@@ -1,26 +1,24 @@
 import os
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify, abort, redirect, url_for
 import json
 from flask_cors import CORS
 from icecream import ic
 from .database.models import db_drop_and_create_all, setup_db, Drink
 from .auth.auth import AuthError, requires_auth
+from flasgger import Swagger
 
+HOST = "127.0.0.1"
+PORT = 5000
 
 app = Flask(__name__)
 setup_db(app)
 CORS(app)
+swagger = Swagger(app)
 
 
 @app.route("/")
 def index():
-    return jsonify({"success": True, "message": "Welcome to Coffee Shop API"})
-
-
-@app.route("/login")
-@requires_auth()
-def login(payload):
-    return jsonify({"success": True, "message": "You have logged in"})
+    return redirect(f"http://{HOST}:{PORT}/apidocs")
 
 
 """
@@ -46,6 +44,43 @@ STATUS: DONE
 
 @app.route("/drinks")
 def get_drinks():
+    """Get a list of drinks in short form
+    ---
+    definitions:
+        ListDrinkShort:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                drinks:
+                    type: array
+                    items:
+                        $ref: '#/definitions/DrinkShort'
+        DrinkShort:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                recipe:
+                    $ref: '#definitions/RecipeShort'
+
+        RecipeShort:
+            type: object
+            properties:
+                color:
+                    type: string
+                parts:
+                    type: integer
+
+
+    responses:
+      200:
+        description: A list of drinks in short form
+        schema:
+          $ref: '#/definitions/ListDrinkShort'
+    """
     try:
         drinks = Drink.query.all()
         drinks_list = [drink.short() for drink in drinks]
@@ -69,6 +104,43 @@ STATUS: DONE
 @app.route("/drinks-detail")
 @requires_auth("get:drinks-detail")
 def get_drinks_detail(payload):
+    """Get a list of drinks in long form
+    ---
+    definitions:
+        ListDrinkLong:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                drinks:
+                    type: array
+                    items:
+                        $ref: '#/definitions/DrinkLong'
+        DrinkLong:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                recipe:
+                    $ref: '#definitions/RecipeLong'
+        RecipeLong:
+            type: object
+            properties:
+                name:
+                    type: string
+                color:
+                    type: string
+                parts:
+                    type: integer
+    responses:
+      200:
+        description: A list of drinks in long form
+        schema:
+          $ref: '#/definitions/ListDrinkLong'
+    """
+
     try:
         drinks = Drink.query.all()
         drinks = [drink.long() for drink in drinks]
@@ -93,13 +165,36 @@ STATUS: DONE
 @app.route("/drinks", methods=["POST"])
 @requires_auth("post:drinks")
 def create_drinks(payload):
+    """Add a new drink
+    ---
+    parameters:
+        -   in: body
+            name: drink
+            description: a drink detail to be added
+            schema:
+                type: object
+                required:
+                    - title
+                    - recipe
+                properties:
+                    title:
+                        type: string
+                    recipe:
+                        $ref: '#/definitions/RecipeLong'
+    responses:
+      200:
+        description: The newly created drink
+        schema:
+          $ref: '#/definitions/DrinkLong'
+    """
+
     try:
         reqBody = request.get_json()
         title = reqBody["title"]
         recipe = json.dumps(reqBody["recipe"])
         drink = Drink(title, recipe)
         drink.insert()
-        return jsonify({"success": True, "drinks": drink.long()})
+        return jsonify({"success": True, "drinks": drink.long()}), 200
     except Exception as err:
         print(err)
         abort(400)
@@ -122,6 +217,30 @@ STATUS: DONE
 @app.route("/drinks/<int:drink_id>", methods=["PATCH"])
 @requires_auth("patch:drinks")
 def update_drinks(payload, drink_id):
+    """Update an existing drink
+    ---
+    parameters:
+        -   in: query
+            name: drink_id
+            type: string
+            description: The id of the drink to be updated
+        -   in: body
+            name: drink
+            description: a drink detail to be updated
+            schema:
+                type: object
+                properties:
+                    title:
+                        type: string
+                    recipe:
+                        $ref: '#/definitions/RecipeLong'
+    responses:
+      200:
+        description: The newly updated drink
+        schema:
+          $ref: '#/definitions/DrinkLong'
+    """
+
     if drink_id is None:
         abort(400)
     drink = Drink.query.filter(Drink.id == drink_id).one_or_none()
@@ -159,6 +278,26 @@ STATUS: DONE
 @app.route("/drinks/<int:drink_id>", methods=["DELETE"])
 @requires_auth("delete:drinks")
 def delete_drinks(payload, drink_id):
+    """Delete an existing drink
+    ---
+    parameters:
+        -   in: query
+            name: drink_id
+            type: string
+            description: The id of the drink to be deleted
+    responses:
+      200:
+        description: The id of the deleted drink
+        schema:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                delete:
+                    type: string
+
+    """
+
     if drink_id is None:
         abort(400)
     drink = Drink.query.filter(Drink.id == drink_id).one_or_none()
@@ -178,12 +317,6 @@ def delete_drinks(payload, drink_id):
 # Error Handling
 """
 Example error handling for unprocessable entity
-"""
-
-"""
-STATUS: DONE
-@TODO: implement error handler for AuthError
-    error handler should conform to general task above
 """
 
 
@@ -251,3 +384,32 @@ def unprocessable(error):
         jsonify({"success": False, "error": 422, "message": "unprocessable"}),
         422,
     )
+
+
+"""
+STATUS: DONE
+@TODO: implement error handler for AuthError
+    error handler should conform to general task above
+"""
+
+
+@app.errorhandler(AuthError)
+def handle_auth_error(error):
+    """
+    List of errors:
+        - 400: invalid_header
+            Unable to parse authentication token
+        - 400: invalid_token
+            Token format is invalid
+        - 401: invalid_claims
+            Incorrect claims. Please, check the audience and issuer
+        - 401: token_expired
+            Token expired
+        - 403: "unauthorized"
+            Permission not granted
+    """
+    return jsonify(error.error), error.status_code
+
+
+if __name__ == "__main__":
+    app.run(host=HOST, port=PORT, debug=True)
