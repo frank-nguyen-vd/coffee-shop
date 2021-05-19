@@ -44,7 +44,7 @@ STATUS: DONE
 
 @app.route("/drinks")
 def get_drinks():
-    """Get a list of drinks
+    """Get a list of drinks in short form
     ---
     definitions:
         ListDrinkShort:
@@ -65,15 +65,7 @@ def get_drinks():
                     type: string
                 recipe:
                     $ref: '#definitions/RecipeShort'
-        RecipeLong:
-            type: object
-            properties:
-                name:
-                    type: string
-                color:
-                    type: string
-                parts:
-                    type: integer
+
         RecipeShort:
             type: object
             properties:
@@ -112,6 +104,43 @@ STATUS: DONE
 @app.route("/drinks-detail")
 @requires_auth("get:drinks-detail")
 def get_drinks_detail(payload):
+    """Get a list of drinks in long form
+    ---
+    definitions:
+        ListDrinkLong:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                drinks:
+                    type: array
+                    items:
+                        $ref: '#/definitions/DrinkLong'
+        DrinkLong:
+            type: object
+            properties:
+                id:
+                    type: integer
+                title:
+                    type: string
+                recipe:
+                    $ref: '#definitions/RecipeLong'
+        RecipeLong:
+            type: object
+            properties:
+                name:
+                    type: string
+                color:
+                    type: string
+                parts:
+                    type: integer
+    responses:
+      200:
+        description: A list of drinks in long form
+        schema:
+          $ref: '#/definitions/ListDrinkLong'
+    """
+
     try:
         drinks = Drink.query.all()
         drinks = [drink.long() for drink in drinks]
