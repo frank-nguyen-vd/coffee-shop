@@ -82,8 +82,8 @@ def check_permissions(permission, payload):
     if "permissions" not in payload:
         raise AuthError(
             {
-                "code": "invalid_claims",
-                "description": "Permissions not included in JWT.",
+                "code": "invalid_token",
+                "description": "Token format is invalid",
             },
             400,
         )
@@ -92,7 +92,7 @@ def check_permissions(permission, payload):
     if permission in payload["permissions"]:
         return True
     raise AuthError(
-        {"code": "unauthorized", "description": "Permission not found."},
+        {"code": "unauthorized", "description": "Permission not granted"},
         403,
     )
 
@@ -116,7 +116,9 @@ STATUS: DONE
 def verify_decode_jwt(token):
     config = load_config(CONFIG_PATH)
     # GET THE PUBLIC KEY FROM AUTH0
-    jsonurl = urlopen("https://{}/.well-known/jwks.json".format(config["DOMAIN"]))
+    jsonurl = urlopen(
+        "https://{}/.well-known/jwks.json".format(config["DOMAIN"])
+    )
     jwks = json.loads(jsonurl.read())
 
     # GET THE DATA IN THE HEADER
@@ -128,9 +130,9 @@ def verify_decode_jwt(token):
         raise AuthError(
             {
                 "code": "invalid_header",
-                "description": "Authorization malformed.",
+                "description": "Unable to parse authentication token",
             },
-            401,
+            400,
         )
 
     for key in jwks["keys"]:
@@ -175,7 +177,7 @@ def verify_decode_jwt(token):
             raise AuthError(
                 {
                     "code": "invalid_header",
-                    "description": "Unable to parse authentication token.",
+                    "description": "Unable to parse authentication token",
                 },
                 400,
             )
@@ -205,18 +207,10 @@ def requires_auth(permission=""):
     def requires_auth_decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            try:
-                token = get_token_auth_header()
-                payload = verify_decode_jwt(token)
-                check_permissions(permission, payload)
-            except Exception as err:
-                if err.status_code == 401:
-                    abort(401)
-                elif err.status_code == 403:
-                    abort(403)
-                elif err.status_code == 400:
-                    abort(400)
-                return
+
+            token = get_token_auth_header()
+            payload = verify_decode_jwt(token)
+            check_permissions(permission, payload)
 
             return f(payload, *args, **kwargs)
 
