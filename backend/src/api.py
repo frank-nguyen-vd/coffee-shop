@@ -217,6 +217,30 @@ STATUS: DONE
 @app.route("/drinks/<int:drink_id>", methods=["PATCH"])
 @requires_auth("patch:drinks")
 def update_drinks(payload, drink_id):
+    """Update an existing drink
+    ---
+    parameters:
+        -   in: query
+            name: drink_id
+            type: integer
+            description: The id of the drink to be updated
+        -   in: body
+            name: drink
+            description: a drink detail to be updated
+            schema:
+                type: object
+                properties:
+                    title:
+                        type: string
+                    recipe:
+                        $ref: '#/definitions/RecipeLong'
+    responses:
+      200:
+        description: The newly updated drink
+        schema:
+          $ref: '#/definitions/DrinkLong'
+    """
+
     if drink_id is None:
         abort(400)
     drink = Drink.query.filter(Drink.id == drink_id).one_or_none()
