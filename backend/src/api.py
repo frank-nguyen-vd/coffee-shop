@@ -319,12 +319,6 @@ def delete_drinks(payload, drink_id):
 Example error handling for unprocessable entity
 """
 
-"""
-STATUS: DONE
-@TODO: implement error handler for AuthError
-    error handler should conform to general task above
-"""
-
 
 @app.errorhandler(400)
 def bad_request(error):
@@ -390,6 +384,31 @@ def unprocessable(error):
         jsonify({"success": False, "error": 422, "message": "unprocessable"}),
         422,
     )
+
+
+"""
+STATUS: DONE
+@TODO: implement error handler for AuthError
+    error handler should conform to general task above
+"""
+
+
+@app.errorhandler(AuthError)
+def handle_auth_error(error):
+    """
+    List of errors:
+        - 400: invalid_header
+            Unable to parse authentication token
+        - 400: invalid_token
+            Token format is invalid
+        - 401: invalid_claims
+            Incorrect claims. Please, check the audience and issuer
+        - 401: token_expired
+            Token expired
+        - 403: "unauthorized"
+            Permission not granted
+    """
+    return jsonify(error.error), error.status_code
 
 
 if __name__ == "__main__":
