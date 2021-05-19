@@ -1,26 +1,24 @@
 import os
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify, abort, redirect, url_for
 import json
 from flask_cors import CORS
 from icecream import ic
 from .database.models import db_drop_and_create_all, setup_db, Drink
 from .auth.auth import AuthError, requires_auth
+from flasgger import Swagger
 
+HOST = "127.0.0.1"
+PORT = 5000
 
 app = Flask(__name__)
 setup_db(app)
 CORS(app)
+swagger = Swagger(app)
 
 
 @app.route("/")
 def index():
-    return jsonify({"success": True, "message": "Welcome to Coffee Shop API"})
-
-
-@app.route("/login")
-@requires_auth()
-def login(payload):
-    return jsonify({"success": True, "message": "You have logged in"})
+    return redirect(f"http://{HOST}:{PORT}/apidocs")
 
 
 """
@@ -46,6 +44,34 @@ STATUS: DONE
 
 @app.route("/drinks")
 def get_drinks():
+    """Get a list of drinks
+    This is using docstrings for specifications.
+    ---
+    parameters:
+      - name: palette
+        in: path
+        type: string
+        enum: ['all', 'rgb', 'cmyk']
+        required: true
+        default: all
+    definitions:
+      Palette:
+        type: object
+        properties:
+          palette_name:
+            type: array
+            items:
+              $ref: '#/definitions/Color'
+      Color:
+        type: string
+    responses:
+      200:
+        description: A list of colors (may be filtered by palette)
+        schema:
+          $ref: '#/definitions/Palette'
+        examples:
+          rgb: ['red', 'green', 'blue']
+    """
     try:
         drinks = Drink.query.all()
         drinks_list = [drink.short() for drink in drinks]
@@ -238,7 +264,9 @@ STATUS: DONE
 @app.errorhandler(404)
 def not_found(error):
     return (
-        jsonify({"success": False, "error": 404, "message": "resource not found"}),
+        jsonify(
+            {"success": False, "error": 404, "message": "resource not found"}
+        ),
         404,
     )
 
@@ -249,3 +277,7 @@ def unprocessable(error):
         jsonify({"success": False, "error": 422, "message": "unprocessable"}),
         422,
     )
+
+
+if __name__ == "__main__":
+    app.run(host=HOST, port=PORT, debug=True)
