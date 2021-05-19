@@ -116,9 +116,7 @@ STATUS: DONE
 def verify_decode_jwt(token):
     config = load_config(CONFIG_PATH)
     # GET THE PUBLIC KEY FROM AUTH0
-    jsonurl = urlopen(
-        "https://{}/.well-known/jwks.json".format(config["DOMAIN"])
-    )
+    jsonurl = urlopen("https://{}/.well-known/jwks.json".format(config["DOMAIN"]))
     jwks = json.loads(jsonurl.read())
 
     # GET THE DATA IN THE HEADER
