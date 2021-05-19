@@ -165,13 +165,36 @@ STATUS: DONE
 @app.route("/drinks", methods=["POST"])
 @requires_auth("post:drinks")
 def create_drinks(payload):
+    """Add a new drink
+    ---
+    parameters:
+        -   in: body
+            name: drink
+            description: a drink detail to be added
+            schema:
+                type: object
+                required:
+                    - title
+                    - recipe
+                properties:
+                    title:
+                        type: string
+                    recipe:
+                        $ref: '#/definitions/RecipeLong'
+    responses:
+      200:
+        description: The newly created drink
+        schema:
+          $ref: '#/definitions/DrinkLong'
+    """
+
     try:
         reqBody = request.get_json()
         title = reqBody["title"]
         recipe = json.dumps(reqBody["recipe"])
         drink = Drink(title, recipe)
         drink.insert()
-        return jsonify({"success": True, "drinks": drink.long()})
+        return jsonify({"success": True, "drinks": drink.long()}), 200
     except Exception as err:
         print(err)
         abort(400)
